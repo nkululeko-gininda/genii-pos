@@ -15,13 +15,16 @@ namespace GeniiPosAPI.Models
         [Required]
         public int Id { get; set; }
 
-        [ForeignKey("Status")]
-        [Required]
-        public virtual InvoiceStatus Status { get; set; }
 
         [ForeignKey("User")]
         [Required]
+        public int UserId { get; set; }
         public virtual User User { get; set; }
+
+        [ForeignKey("Status")]
+        [Required]
+        public int StatusId { get; set;}
+        public virtual InvoiceStatus InvoiceStatus { get; set; }
 
         [Column("Total")]
         [Required]

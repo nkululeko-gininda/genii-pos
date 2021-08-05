@@ -1,9 +1,11 @@
+using GeniiPosAPI.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,6 +35,7 @@ namespace GeniiPosAPI
                 .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
 
             services.AddControllers();
+            services.AddDbContext<GeniiPosDbContext>(o => o.UseSqlServer(Configuration.GetConnectionString("GeniiPosDBConnection")));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GeniiPosAPI", Version = "v1" });
@@ -40,7 +43,7 @@ namespace GeniiPosAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, GeniiPosDbContext dbContext)
         {
             if (env.IsDevelopment())
             {
@@ -48,6 +51,7 @@ namespace GeniiPosAPI
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GeniiPosAPI v1"));
             }
+            dbContext.Database.EnsureCreated();
 
             app.UseHttpsRedirection();
 

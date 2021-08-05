@@ -15,10 +15,10 @@ namespace GeniiPosAPI.Models
         [Required]
         public int Id { get; set; }
 
-        [Column("State")]
+        [Column("Name")]
         [Required]
         [StringLength(50)]
-        public string State { get; set; }
+        public string Name { get; set; }
 
     }
 }
