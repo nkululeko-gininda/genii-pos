@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GeniiPosAPI.Data;
 using GeniiPosAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GeniiPosAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RolesController : ControllerBase

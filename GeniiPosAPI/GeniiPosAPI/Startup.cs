@@ -11,10 +11,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GeniiPosAPI
@@ -31,10 +33,29 @@ namespace GeniiPosAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
 
+            services.AddCors(options => {
+                options.AddPolicy("GeniiPosApiPolicy", builder => {
+                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
+            services.AddAuthentication(auth => {
+                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(bearer=> {
+                    bearer.RequireHttpsMetadata = false;
+                    bearer.SaveToken = true;
+                    bearer.TokenValidationParameters = new TokenValidationParameters {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("GeniiAuthGuardKey")),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                });
+                //.AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
+            
             services.AddControllers();
+            
             services.AddDbContext<GeniiPosDbContext>(o => o.UseSqlServer(Configuration.GetConnectionString("GeniiPosDBConnection")));
             services.AddSwaggerGen(c =>
             {
@@ -45,7 +66,7 @@ namespace GeniiPosAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, GeniiPosDbContext dbContext)
         {
-            if (env.IsDevelopment())
+            if (env.IsDevelopment() || env.IsProduction())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
@@ -56,6 +77,8 @@ namespace GeniiPosAPI
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("GeniiPosApiPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();

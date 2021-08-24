@@ -28,12 +28,12 @@ namespace GeniiPosAPI.Models
         [Column("FirstName")]
         [StringLength(50)]
         [Required]
-        public int FirstName { get; set; }
+        public string FirstName { get; set; }
         
         [Column("LastName")]
         [StringLength(50)]
         [Required]
-        public int LastName { get; set; }
+        public string LastName { get; set; }
         
         [Column("Email")]
         [StringLength(100)]
@@ -47,7 +47,6 @@ namespace GeniiPosAPI.Models
         [ForeignKey("Role")]
         [Required]
         public int RoleId { get; set; }
-        public virtual Role Role { get; set; }
 
         [Column("CreatedDate")]
         [Required]

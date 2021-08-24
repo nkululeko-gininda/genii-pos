@@ -7,9 +7,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GeniiPosAPI.Data;
 using GeniiPosAPI.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using Microsoft.OpenApi.Any;
 
 namespace GeniiPosAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -82,6 +89,36 @@ namespace GeniiPosAPI.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
+        }
+        
+        // POST: api/Users
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("authenticate")]
+        public IActionResult AuthGuard([FromBody] User userCredentials)
+        {
+            string username = userCredentials.Username;
+            string password = userCredentials.Password;
+
+            var authUser = (from user in _context.User where (user.Username == username && user.Password == password) select user).FirstAsync();
+            if (authUser == null)
+            {
+                return Unauthorized();
+            }
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenKey = Encoding.ASCII.GetBytes("GeniiAuthGuardKey");
+            var tokenDesciptor = new SecurityTokenDescriptor { 
+                Subject = new ClaimsIdentity(new Claim[] { 
+                    new Claim(ClaimTypes.Name, username)
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDesciptor);
+            
+            return Ok(tokenHandler.WriteToken(token));
+            
         }
 
         // DELETE: api/Users/5

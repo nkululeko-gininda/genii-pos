@@ -19,12 +19,10 @@ namespace GeniiPosAPI.Models
         [ForeignKey("User")]
         [Required]
         public int UserId { get; set; }
-        public virtual User User { get; set; }
 
         [ForeignKey("Status")]
         [Required]
         public int StatusId { get; set;}
-        public virtual InvoiceStatus InvoiceStatus { get; set; }
 
         [Column("Total")]
         [Required]

@@ -18,12 +18,10 @@ namespace GeniiPosAPI.Models
         [ForeignKey("Invoice")]
         [Required]
         public int InvoiceId { get; set; }
-        public virtual Invoice Invoice { get; set; }
         
         [ForeignKey("Product")]
         [Required]
         public int ProductId { get; set; }
-        public virtual Product Product { get; set; }
 
         [Column("Quantity")]
         [Required]
