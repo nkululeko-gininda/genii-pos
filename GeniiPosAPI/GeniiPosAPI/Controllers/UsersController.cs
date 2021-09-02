@@ -121,6 +121,22 @@ namespace GeniiPosAPI.Controllers
             
         }
 
+        [HttpGet("authuser")]
+        public int AuthUser([FromBody] User userCredentials)
+        {
+            string username = userCredentials.Username;
+            string password = userCredentials.Password;
+
+            var authUser = (from user in _context.User where (user.Username == username && user.Password == password) select user).FirstAsync().Id;
+            if (authUser == -1)
+            {
+                return -1;
+            }
+
+            return authUser;
+        }
+
+
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
