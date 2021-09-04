@@ -95,7 +95,10 @@ namespace GeniiPosAPI.Controllers
             {
                 return NotFound();
             }
-
+            var invoiceItemsCollection = (from items in _context.InvoiceItem where (items.InvoiceId == invoice.Id) select items).ToList();
+            foreach (InvoiceItem item in invoiceItemsCollection) {
+                _context.InvoiceItem.Remove(item);
+            }
             _context.Invoice.Remove(invoice);
             await _context.SaveChangesAsync();
 
